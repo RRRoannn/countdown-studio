@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Countdown Studio</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #a855f7;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+
+            background:
+                radial-gradient(circle at 20% 10%, rgba(139,92,246,.35), transparent 35%),
+                radial-gradient(circle at 80% 90%, rgba(236,72,153,.22), transparent 35%),
+                linear-gradient(135deg,#08000f,#160025,#050008);
+
+            overflow-x: hidden;
+            transition: background .6s ease;
+        }
+
+        /* ================================
+           THEMES
+        ================================= */
+
+        body.theme-balloons {
+            background:
+                radial-gradient(circle at 20% 10%, #ff6b9d55, transparent 35%),
+                radial-gradient(circle at 80% 90%, #60a5fa55, transparent 35%),
+                linear-gradient(135deg,#17001f,#32104d,#06162d);
+        }
+
+        body.theme-christmas {
+            background:
+                radial-gradient(circle at 50% 0%, #ef444455, transparent 35%),
+                linear-gradient(135deg,#020b09,#073b2a,#071313);
+        }
+
+        body.theme-sinterklaas {
+            background:
+                radial-gradient(circle at 50% 0%, #ef444455, transparent 35%),
+                linear-gradient(135deg,#160003,#50050b,#120002);
+        }
+
+        body.theme-easter {
+            background:
+                radial-gradient(circle at 20% 10%, #f9a8d455, transparent 35%),
+                radial-gradient(circle at 80% 80%, #86efac55, transparent 35%),
+                linear-gradient(135deg,#21102c,#173b35,#211b35);
+        }
+
+        body.theme-newyear {
+            background:
+                radial-gradient(circle at 50% 0%, #facc1555, transparent 30%),
+                linear-gradient(135deg,#020617,#111827,#020617);
+        }
+
+        /* ================================
+           PAGINA
+        ================================= */
+
+        .page {
+            width: 92%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 45px 0 70px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 9px 16px;
+            border-radius: 999px;
+
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.14);
+
+            color: #d8c8ff;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .hero h1 {
+            font-size: clamp(38px,7vw,70px);
+            margin: 0;
+
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #d8b4fe,
+                #f9a8d4,
+                #ffffff
+            );
+
+            background-size: 250% auto;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+
+            animation: titleGlow 6s linear infinite;
+        }
+
+        @keyframes titleGlow {
+            to {
+                background-position: 250% center;
+            }
+        }
+
+        .hero p {
+            color: #bdb0cc;
+            font-size: 18px;
+            margin-top: 12px;
+        }
+
+        /* ================================
+           GLASS KAARTEN
+        ================================= */
+
+        .glass {
+            background: rgba(255,255,255,.075);
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 28px;
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            box-shadow: 0 25px 70px rgba(0,0,0,.25);
+        }
+
+        .setup {
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin: 0 0 8px;
+        }
+
+        .section-subtitle {
+            color: #a99db4;
+            margin: 0 0 25px;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #d8cedf;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+
+            border: 1px solid rgba(255,255,255,.13);
+
+            background: rgba(0,0,0,.22);
+            color: white;
+
+            border-radius: 14px;
+            padding: 14px 15px;
+
+            font-size: 16px;
+            outline: none;
+
+            transition: .2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(168,85,247,.15);
+        }
+
+        /* ================================
+           THEMES
+        ================================= */
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(6,1fr);
+            gap: 12px;
+        }
+
+        .theme {
+            cursor: pointer;
+
+            padding: 15px 8px;
+            text-align: center;
+
+            border-radius: 17px;
+
+            border: 1px solid rgba(255,255,255,.1);
+            background: rgba(255,255,255,.05);
+
+            transition: .25s;
+        }
+
+        .theme:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,.1);
+        }
+
+        .theme.selected {
+            border-color: var(--accent);
+            background: rgba(168,85,247,.18);
+
+            box-shadow:
+                0 0 20px rgba(168,85,247,.18);
+        }
+
+        .theme-icon {
+            display: block;
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+
+        .theme-name {
+            font-size: 13px;
+            color: #d6ccdc;
+        }
+
+        /* ================================
+           KNOPPEN
+        ================================= */
+
+        .button-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            margin-top: 25px;
+            margin-bottom: 18px;
+
+            flex-wrap: wrap;
+        }
+
+        .save-button,
+        .reset-button {
+            border: none;
+
+            color: white;
+
+            padding: 13px 22px;
+
+            border-radius: 14px;
+
+            font-size: 15px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .save-button {
+            background: #22c55e;
+        }
+
+        .reset-button {
+            background: #ef4444;
+        }
+
+        .save-button:hover,
+        .reset-button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        #saveMessage {
+            color: #86efac;
+            font-size: 14px;
+        }
+
+        /* ================================
+           SWITCH
+        ================================= */
+
+        .wishlist-option {
+            margin-top: 25px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 17px 19px;
+
+            background: rgba(0,0,0,.17);
+            border-radius: 17px;
+        }
+
+        .switch-info strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .switch-info span {
+            color: #a99db0;
+            font-size: 13px;
+        }
+
+        .switch {
+            position: relative;
+            width: 58px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+
+            cursor: pointer;
+
+            background: #555;
+            border-radius: 999px;
+
+            transition: .3s;
+        }
+
+        .slider:before {
+            content: "";
+
+            position: absolute;
+
+            width: 24px;
+            height: 24px;
+
+            left: 4px;
+            top: 4px;
+
+            background: white;
+            border-radius: 50%;
+
+            transition: .3s;
+        }
+
+        .switch input:checked + .slider {
+            background: #22c55e;
+        }
+
+        .switch input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* ================================
+           COUNTDOWN
+        ================================= */
+
+        .countdown-card {
+            padding: 35px;
+            text-align: center;
+
+            margin-bottom: 30px;
+        }
+
+        .event-title {
+            font-size: clamp(28px,5vw,48px);
+            margin: 5px 0;
+        }
+
+        .event-date {
+            color: #afa3ba;
+            margin-bottom: 30px;
+        }
+
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 15px;
+        }
+
+        .time-box {
+            padding: 25px 10px;
+
+            background: rgba(255,255,255,.065);
+
+            border-radius: 20px;
+
+            border: 1px solid rgba(255,255,255,.1);
+
+            transition: .25s;
+        }
+
+        .time-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,.22);
+        }
+
+        .number {
+            display: block;
+
+            font-size: clamp(32px,5vw,52px);
+
+            font-weight: 800;
+
+            text-shadow:
+                0 0 20px rgba(255,255,255,.18);
+        }
+
+        .label {
+            margin-top: 7px;
+
+            display: block;
+
+            color: #a99fb0;
+
+            font-size: 12px;
+
+            letter-spacing: 2px;
+
+            text-transform: uppercase;
+        }
+
+        /* ================================
+           VERLANGLIJST
+        ================================= */
+
+        .wishlist {
+            display: none;
+            padding: 30px;
+        }
+
+        .wishlist.visible {
+            display: block;
+        }
+
+        .wishlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 22px;
+        }
+
+        .add-note {
+            border: none;
+
+            background: var(--accent);
+            color: white;
+
+            padding: 12px 17px;
+
+            border-radius: 13px;
+
+            cursor: pointer;
+            font-weight: bold;
+
+            transition: .2s;
+        }
+
+        .add-note:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.12);
+        }
+
+        .notes {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fill,minmax(220px,1fr));
+
+            gap: 18px;
+        }
+
+        .note {
+            min-height: 220px;
+
+            padding: 20px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    rgba(255,255,255,.94),
+                    rgba(255,255,255,.86)
+                );
+
+            color: #26212b;
+
+            box-shadow:
+                0 15px 35px rgba(0,0,0,.2);
+
+            transform: rotate(-1deg);
+        }
+
+        .note:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        .note input,
+        .note textarea {
+            background: transparent;
+
+            border: none;
+
+            box-shadow: none;
+
+            color: #26212b;
+
+            border-radius: 0;
+        }
+
+        .note input {
+            font-size: 20px;
+            font-weight: bold;
+
+            padding: 5px 0;
+
+            border-bottom: 1px dashed #aaa;
+        }
+
+        .note textarea {
+            resize: vertical;
+
+            min-height: 140px;
+
+            padding: 12px 0 0;
+
+            line-height: 1.5;
+        }
+
+        .delete-note {
+            float: right;
+
+            border: none;
+
+            background: transparent;
+
+            cursor: pointer;
+
+            font-size: 18px;
+
+            color: #777;
+        }
+
+        .empty-notes {
+            color: #9f93a9;
+
+            text-align: center;
+
+            padding: 25px;
+        }
+
+        /* ================================
+           POP-UP
+        ================================= */
+
+        .popup-overlay {
+            position: fixed;
+
+            inset: 0;
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(0,0,0,.65);
+
+            backdrop-filter: blur(8px);
+
+            z-index: 1000;
+
+            padding: 20px;
+        }
+
+        .popup-overlay.show {
+            display: flex;
+        }
+
+        .popup {
+            width: 100%;
+            max-width: 430px;
+
+            padding: 30px;
+
+            text-align: center;
+
+            background:
+                rgba(30,20,40,.95);
+
+            border: 1px solid rgba(255,255,255,.14);
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 30px 80px rgba(0,0,0,.5);
+
+            animation: popupIn .2s ease;
+        }
+
+        @keyframes popupIn {
+
+            from {
+                transform: scale(.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+        }
+
+        .popup-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .popup h2 {
+            margin: 0 0 10px;
+        }
+
+        .popup p {
+            color: #bdb0cc;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .popup-buttons button {
+            flex: 1;
+
+            border: none;
+
+            padding: 13px;
+
+            border-radius: 13px;
+
+            font-weight: bold;
+            font-size: 15px;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .cancel-button {
+            background: rgba(255,255,255,.1);
+            color: white;
+        }
+
+        .confirm-reset {
+            background: #ef4444;
+            color: white;
+        }
+
+        .popup-buttons button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* ================================
+           DECORATIES
+        ================================= */
+
+        .decor {
+            position: fixed;
+
+            pointer-events: none;
+
+            z-index: -1;
+
+            user-select: none;
+        }
+
+        .balloon {
+            font-size: 45px;
+
+            animation:
+                float 5s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,100% {
+                transform:
+                    translateY(0)
+                    rotate(-4deg);
+            }
+
+            50% {
+                transform:
+                    translateY(-25px)
+                    rotate(5deg);
+            }
+
+        }
+
+        .firework {
+            font-size: 45px;
+
+            animation:
+                firework 1.8s ease-in-out infinite;
+        }
+
+        @keyframes firework {
+
+            0%,100% {
+                transform: scale(.75);
+                opacity: .35;
+            }
+
+            50% {
+                transform: scale(1.25);
+                opacity: 1;
+            }
+
+        }
+
+        /* ================================
+           MOBIEL
+        ================================= */
+
+        @media (max-width: 850px) {
+
+            .theme-grid {
+                grid-template-columns: repeat(3,1fr);
+            }
+
+            .fields {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .page {
+                width: 94%;
+                padding-top: 25px;
+            }
+
+            .setup,
+            .countdown-card,
+            .wishlist {
+                padding: 20px;
+            }
+
+            .theme-grid {
+                grid-template-columns: repeat(2,1fr);
+            }
+
+            .countdown {
+                grid-template-columns: repeat(2,1fr);
+            }
+
+            .wishlist-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .save-button,
+            .reset-button {
+                width: 100%;
+            }
+
+            .popup-buttons {
+                flex-direction: column;
+            }
+
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <div id="decorations"></div>
+
+
+    <main class="page">
+
+        <!-- ================================
+             TITEL
+        ================================= -->
+
+        <section class="hero">
+
+            <div class="hero-badge">
+                ✨ Jouw eigen moment
+            </div>
+
+            <h1>
+                Countdown Studio
+            </h1>
+
+            <p>
+                Maak van ieder bijzonder moment een prachtige aftelling.
+            </p>
+
+        </section>
+
+
+        <!-- ================================
+             INSTELLINGEN
+        ================================= -->
+
+        <section class="glass setup">
+
+            <h2 class="section-title">
+                ✨ Maak jouw aftelling
+            </h2>
+
+            <p class="section-subtitle">
+                Kies een naam, datum en sfeer voor jouw speciale moment.
+            </p>
+
+
+            <div class="fields">
+
+                <!-- TITEL -->
+
+                <div class="field">
+
+                    <label for="title">
+                        Hoe wil je jouw moment noemen?
+                    </label>
+
+                    <input
+                        id="title"
+                        type="text"
+                        placeholder="Bijvoorbeeld: Mijn verjaardag 🎂"
+                    >
+
+                </div>
+
+
+                <!-- DATUM -->
+
+                <div class="field">
+
+                    <label for="date">
+                        Wanneer is het zover?
+                    </label>
+
+                    <input
+                        id="date"
+                        type="datetime-local"
+                    >
+
+                </div>
+
+
+                <!-- THEMA -->
+
+                <div class="field full">
+
+                    <label>
+                        Kies een sfeer
+                    </label>
+
+
+                    <div class="theme-grid">
+
+                        <div
+                            class="theme selected"
+                            data-theme="default"
+                        >
+
+                            <span class="theme-icon">
+                                ✨
+                            </span>
+
+                            <span class="theme-name">
+                                Galaxy
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="theme"
+                            data-theme="balloons"
+                        >
+
+                            <span class="theme-icon">
+                                🎈
+                            </span>
+
+                            <span class="theme-name">
+                                Ballonnen
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="theme"
+                            data-theme="christmas"
+                        >
+
+                            <span class="theme-icon">
+                                🎄
+                            </span>
+
+                            <span class="theme-name">
+                                Kerst
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="theme"
+                            data-theme="sinterklaas"
+                        >
+
+                            <span class="theme-icon">
+                                🎁
+                            </span>
+
+                            <span class="theme-name">
+                                Sinterklaas
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="theme"
+                            data-theme="easter"
+                        >
+
+                            <span class="theme-icon">
+                                🐣
+                            </span>
+
+                            <span class="theme-name">
+                                Pasen
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="theme"
+                            data-theme="newyear"
+                        >
+
+                            <span class="theme-icon">
+                                🎆
+                            </span>
+
+                            <span class="theme-name">
+                                Oud & Nieuw
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================
+                 OPSLAAN + RESET
+            ================================= -->
+
+            <div class="button-area">
+
+                <button
+                    id="saveButton"
+                    class="save-button"
+                >
+                    💾 Opslaan
+                </button>
+
+
+                <button
+                    id="resetButton"
+                    class="reset-button"
+                >
+                    🗑️ Alles resetten
+                </button>
+
+
+                <span id="saveMessage"></span>
+
+            </div>
+
+
+            <!-- ================================
+                 VERLANGLIJST SWITCH
+            ================================= -->
+
+            <div class="wishlist-option">
+
+                <div class="switch-info">
+
+                    <strong>
+                        📝 Verlanglijstje
+                    </strong>
+
+                    <span>
+                        Maak een persoonlijk lijstje met wensen.
+                    </span>
+
+                </div>
+
+
+                <label class="switch">
+
+                    <input
+                        id="wishlistToggle"
+                        type="checkbox"
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             COUNTDOWN
+        ================================= -->
+
+        <section class="glass countdown-card">
+
+            <div class="hero-badge">
+                ⏳ Het moment komt steeds dichterbij
+            </div>
+
+
+            <h2
+                class="event-title"
+                id="eventTitle"
+            >
+                Mijn speciale moment
+            </h2>
+
+
+            <div
+                class="event-date"
+                id="eventDate"
+            >
+                Kies hierboven een datum
+            </div>
+
+
+            <div class="countdown">
+
+                <div class="time-box">
+
+                    <span
+                        class="number"
+                        id="days"
+                    >
+                        —
+                    </span>
+
+                    <span class="label">
+                        Dagen
+                    </span>
+
+                </div>
+
+
+                <div class="time-box">
+
+                    <span
+                        class="number"
+                        id="hours"
+                    >
+                        —
+                    </span>
+
+                    <span class="label">
+                        Uren
+                    </span>
+
+                </div>
+
+
+                <div class="time-box">
+
+                    <span
+                        class="number"
+                        id="minutes"
+                    >
+                        —
+                    </span>
+
+                    <span class="label">
+                        Minuten
+                    </span>
+
+                </div>
+
+
+                <div class="time-box">
+
+                    <span
+                        class="number"
+                        id="seconds"
+                    >
+                        —
+                    </span>
+
+                    <span class="label">
+                        Seconden
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             VERLANGLIJST
+        ================================= -->
+
+        <section
+            class="glass wishlist"
+            id="wishlist"
+        >
+
+            <div class="wishlist-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        📝 Mijn verlanglijstje
+                    </h2>
+
+                    <p class="section-subtitle">
+                        Schrijf hier op wat je graag zou willen.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="add-note"
+                    id="addNote"
+                >
+                    + Nieuw blaadje
+                </button>
+
+            </div>
+
+
+            <div
+                class="notes"
+                id="notes"
+            >
+
+                <div
+                    class="empty-notes"
+                    id="emptyNotes"
+                >
+                    Je hebt nog geen blaadjes.
+                    Klik op <b>+ Nieuw blaadje</b>
+                    om te beginnen.
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================================
+         RESET POP-UP
+    ================================= -->
+
+    <div
+        class="popup-overlay"
+        id="resetPopup"
+    >
+
+        <div class="popup">
+
+            <div class="popup-icon">
+                ⚠️
+            </div>
+
+
+            <h2>
+                Alles resetten?
+            </h2>
+
+
+            <p>
+                Weet je zeker dat je alles wilt resetten?
+                Je titel, datum, thema en verlanglijstje
+                worden verwijderd.
+            </p>
+
+
+            <div class="popup-buttons">
+
+                <button
+                    class="cancel-button"
+                    id="cancelReset"
+                >
+                    Nee, annuleren
+                </button>
+
+
+                <button
+                    class="confirm-reset"
+                    id="confirmReset"
+                >
+                    Ja, alles resetten
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /* ==========================================
+           ELEMENTEN
+        ========================================== */
+
+        const titleInput =
+            document.getElementById("title");
+
+        const dateInput =
+            document.getElementById("date");
+
+        const eventTitle =
+            document.getElementById("eventTitle");
+
+        const eventDate =
+            document.getElementById("eventDate");
+
+        const wishlistToggle =
+            document.getElementById("wishlistToggle");
+
+        const wishlist =
+            document.getElementById("wishlist");
+
+        const addNote =
+            document.getElementById("addNote");
+
+        const notes =
+            document.getElementById("notes");
+
+        const emptyNotes =
+            document.getElementById("emptyNotes");
+
+        const saveButton =
+            document.getElementById("saveButton");
+
+        const saveMessage =
+            document.getElementById("saveMessage");
+
+        const resetButton =
+            document.getElementById("resetButton");
+
+        const resetPopup =
+            document.getElementById("resetPopup");
+
+        const cancelReset =
+            document.getElementById("cancelReset");
+
+        const confirmReset =
+            document.getElementById("confirmReset");
+
+        const decorations =
+            document.getElementById("decorations");
+
+        const themes =
+            document.querySelectorAll(".theme");
+
+
+        let targetDate = null;
+
+
+        /* ==========================================
+           TITEL
+        ========================================== */
+
+        function updateTitle() {
+
+            const value =
+                titleInput.value.trim();
+
+            eventTitle.textContent =
+                value || "Mijn speciale moment";
+        }
+
+
+        titleInput.addEventListener(
+            "input",
+            updateTitle
+        );
+
+
+        /* ==========================================
+           DATUM
+        ========================================== */
+
+        function updateDate() {
+
+            if (!dateInput.value) {
+
+                targetDate = null;
+
+                eventDate.textContent =
+                    "Kies hierboven een datum";
+
+                return;
+            }
+
+
+            const date =
+                new Date(dateInput.value);
+
+
+            if (isNaN(date.getTime())) {
+
+                targetDate = null;
+
+                eventDate.textContent =
+                    "Ongeldige datum";
+
+                return;
+            }
+
+
+            targetDate =
+                date.getTime();
+
+
+            eventDate.textContent =
+                date.toLocaleString(
+                    "nl-NL",
+                    {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+        }
+
+
+        dateInput.addEventListener(
+            "input",
+            updateDate
+        );
+
+
+        /* ==========================================
+           COUNTDOWN
+        ========================================== */
+
+        function updateCountdown() {
+
+            if (!targetDate) {
+
+                document.getElementById(
+                    "days"
+                ).textContent = "—";
+
+                document.getElementById(
+                    "hours"
+                ).textContent = "—";
+
+                document.getElementById(
+                    "minutes"
+                ).textContent = "—";
+
+                document.getElementById(
+                    "seconds"
+                ).textContent = "—";
+
+                return;
+            }
+
+
+            const difference =
+                targetDate - Date.now();
+
+
+            if (difference <= 0) {
+
+                document.getElementById(
+                    "days"
+                ).textContent = "🎉";
+
+                document.getElementById(
+                    "hours"
+                ).textContent = "🎂";
+
+                document.getElementById(
+                    "minutes"
+                ).textContent = "🎉";
+
+                document.getElementById(
+                    "seconds"
+                ).textContent = "🎈";
+
+                eventDate.textContent =
+                    "Het moment is aangebroken!";
+
+                return;
+            }
+
+
+            const days =
+                Math.floor(
+                    difference /
+                    (1000 * 60 * 60 * 24)
+                );
+
+
+            const hours =
+                Math.floor(
+                    difference %
+                    (1000 * 60 * 60 * 24) /
+                    (1000 * 60 * 60)
+                );
+
+
+            const minutes =
+                Math.floor(
+                    difference %
+                    (1000 * 60 * 60) /
+                    (1000 * 60)
+                );
+
+
+            const seconds =
+                Math.floor(
+                    difference %
+                    (1000 * 60) /
+                    1000
+                );
+
+
+            document.getElementById(
+                "days"
+            ).textContent = days;
+
+            document.getElementById(
+                "hours"
+            ).textContent = hours;
+
+            document.getElementById(
+                "minutes"
+            ).textContent = minutes;
+
+            document.getElementById(
+                "seconds"
+            ).textContent = seconds;
+        }
+
+
+        setInterval(
+            updateCountdown,
+            1000
+        );
+
+
+        /* ==========================================
+           DECORATIES
+        ========================================== */
+
+        function createDecor(
+            symbol,
+            className,
+            left,
+            top
+        ) {
+
+            const element =
+                document.createElement("div");
+
+            element.className =
+                "decor " + className;
+
+            element.textContent =
+                symbol;
+
+            element.style.left =
+                left;
+
+            element.style.top =
+                top;
+
+            decorations.appendChild(
+                element
+            );
+        }
+
+
+        /* ==========================================
+           THEMA VERANDEREN
+        ========================================== */
+
+        function changeTheme(theme) {
+
+            document.body.className = "";
+
+
+            if (theme !== "default") {
+
+                document.body.classList.add(
+                    "theme-" + theme
+                );
+
+            }
+
+
+            decorations.innerHTML = "";
+
+
+            if (theme === "balloons") {
+
+                createDecor("🎈","balloon","8%","15%");
+                createDecor("🎈","balloon","87%","20%");
+                createDecor("🎈","balloon","15%","78%");
+                createDecor("🎈","balloon","82%","75%");
+                createDecor("🎁","balloon","50%","8%");
+
+            }
+
+
+            if (theme === "christmas") {
+
+                createDecor("❄️","balloon","10%","15%");
+                createDecor("🎄","balloon","88%","18%");
+                createDecor("❄️","balloon","20%","80%");
+                createDecor("🎁","balloon","80%","75%");
+                createDecor("❄️","balloon","50%","10%");
+
+            }
+
+
+            if (theme === "sinterklaas") {
+
+                createDecor("🎁","balloon","10%","18%");
+                createDecor("🎁","balloon","88%","20%");
+                createDecor("🧸","balloon","17%","78%");
+                createDecor("🎁","balloon","80%","75%");
+
+            }
+
+
+            if (theme === "easter") {
+
+                createDecor("🥚","balloon","10%","15%");
+                createDecor("🐣","balloon","88%","20%");
+                createDecor("🌷","balloon","18%","78%");
+                createDecor("🐰","balloon","80%","75%");
+
+            }
+
+
+            if (theme === "newyear") {
+
+                createDecor("🎆","firework","10%","15%");
+                createDecor("🎇","firework","85%","20%");
+                createDecor("🎆","firework","20%","75%");
+                createDecor("🎇","firework","78%","72%");
+                createDecor("✨","firework","50%","10%");
+
+            }
+
+        }
+
+
+        themes.forEach(theme => {
+
+            theme.addEventListener(
+                "click",
+                () => {
+
+                    themes.forEach(item =>
+                        item.classList.remove(
+                            "selected"
+                        )
+                    );
+
+
+                    theme.classList.add(
+                        "selected"
+                    );
+
+
+                    changeTheme(
+                        theme.dataset.theme
+                    );
+
+                }
+            );
+
+        });
+
+
+        /* ==========================================
+           VERLANGLIJST AAN / UIT
+        ========================================== */
+
+        wishlistToggle.addEventListener(
+            "change",
+            () => {
+
+                if (
+                    wishlistToggle.checked
+                ) {
+
+                    wishlist.classList.add(
+                        "visible"
+                    );
+
+                } else {
+
+                    wishlist.classList.remove(
+                        "visible"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* ==========================================
+           NIEUW BLAADJE
+        ========================================== */
+
+        function createNote(
+            savedTitle = "",
+            savedText = ""
+        ) {
+
+            emptyNotes.style.display =
+                "none";
+
+
+            const note =
+                document.createElement("div");
+
+            note.className =
+                "note";
+
+
+            note.innerHTML = `
+                <button
+                    class="delete-note"
+                    title="Verwijderen"
+                >
+                    🗑️
+                </button>
+
+                <input
+                    type="text"
+                    placeholder="Mijn wens..."
+                    aria-label="Titel van wens"
+                >
+
+                <textarea
+                    placeholder="Schrijf hier wat je graag zou willen..."
+                    aria-label="Beschrijving van wens"
+                ></textarea>
+            `;
+
+
+            const input =
+                note.querySelector("input");
+
+            const textarea =
+                note.querySelector("textarea");
+
+
+            input.value =
+                savedTitle;
+
+            textarea.value =
+                savedText;
+
+
+            note.querySelector(
+                ".delete-note"
+            ).addEventListener(
+                "click",
+                () => {
+
+                    note.remove();
+
+
+                    if (
+                        notes.querySelectorAll(
+                            ".note"
+                        ).length === 0
+                    ) {
+
+                        emptyNotes.style.display =
+                            "block";
+
+                    }
+
+                }
+            );
+
+
+            notes.appendChild(note);
+        }
+
+
+        addNote.addEventListener(
+            "click",
+            () => {
+
+                createNote();
+
+            }
+        );
+
+
+        /* ==========================================
+           OPSLAAN
+        ========================================== */
+
+        saveButton.addEventListener(
+            "click",
+            () => {
+
+                const notesData = [];
+
+
+                document
+                    .querySelectorAll(".note")
+                    .forEach(note => {
+
+                        notesData.push({
+
+                            title:
+                                note.querySelector(
+                                    "input"
+                                ).value,
+
+                            text:
+                                note.querySelector(
+                                    "textarea"
+                                ).value
+
+                        });
+
+                    });
+
+
+                const selectedTheme =
+                    document.querySelector(
+                        ".theme.selected"
+                    )?.dataset.theme ||
+                    "default";
+
+
+                const settings = {
+
+                    title:
+                        titleInput.value,
+
+                    date:
+                        dateInput.value,
+
+                    theme:
+                        selectedTheme,
+
+                    wishlist:
+                        wishlistToggle.checked,
+
+                    notes:
+                        notesData
+
+                };
+
+
+                localStorage.setItem(
+                    "countdownStudio",
+                    JSON.stringify(settings)
+                );
+
+
+                saveMessage.textContent =
+                    "✓ Alles is opgeslagen!";
+
+
+                setTimeout(
+                    () => {
+
+                        saveMessage.textContent =
+                            "";
+
+                    },
+                    2500
+                );
+
+            }
+        );
+
+
+        /* ==========================================
+           GEGEVENS LADEN
+        ========================================== */
+
+        function loadSavedData() {
+
+            const saved =
+                localStorage.getItem(
+                    "countdownStudio"
+                );
+
+
+            if (!saved) {
+                return;
+            }
+
+
+            try {
+
+                const settings =
+                    JSON.parse(saved);
+
+
+                /* Titel */
+
+                if (settings.title) {
+
+                    titleInput.value =
+                        settings.title;
+
+                    updateTitle();
+
+                }
+
+
+                /* Datum */
+
+                if (settings.date) {
+
+                    dateInput.value =
+                        settings.date;
+
+                    updateDate();
+
+                }
+
+
+                /* Thema */
+
+                if (settings.theme) {
+
+                    const themeButton =
+                        document.querySelector(
+                            `.theme[data-theme="${settings.theme}"]`
+                        );
+
+
+                    if (themeButton) {
+
+                        themes.forEach(item =>
+                            item.classList.remove(
+                                "selected"
+                            )
+                        );
+
+
+                        themeButton.classList.add(
+                            "selected"
+                        );
+
+
+                        changeTheme(
+                            settings.theme
+                        );
+
+                    }
+
+                }
+
+
+                /* Verlanglijst */
+
+                if (settings.wishlist) {
+
+                    wishlistToggle.checked =
+                        true;
+
+                    wishlist.classList.add(
+                        "visible"
+                    );
+
+                }
+
+
+                /* Blaadjes */
+
+                if (
+                    Array.isArray(
+                        settings.notes
+                    )
+                ) {
+
+                    settings.notes.forEach(
+                        note => {
+
+                            createNote(
+                                note.title || "",
+                                note.text || ""
+                            );
+
+                        }
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "Opgeslagen gegevens konden niet worden geladen."
+                );
+
+            }
+
+        }
+
+
+        /* ==========================================
+           RESET POP-UP OPENEN
+        ========================================== */
+
+        resetButton.addEventListener(
+            "click",
+            () => {
+
+                resetPopup.classList.add(
+                    "show"
+                );
+
+            }
+        );
+
+
+        /* ==========================================
+           RESET ANNULEREN
+        ========================================== */
+
+        cancelReset.addEventListener(
+            "click",
+            () => {
+
+                resetPopup.classList.remove(
+                    "show"
+                );
+
+            }
+        );
+
+
+        /* ==========================================
+           ALLES RESETTEN
+        ========================================== */
+
+        confirmReset.addEventListener(
+            "click",
+            () => {
+
+                /* Opgeslagen data verwijderen */
+
+                localStorage.removeItem(
+                    "countdownStudio"
+                );
+
+
+                /* Titel leegmaken */
+
+                titleInput.value = "";
+
+                updateTitle();
+
+
+                /* Datum leegmaken */
+
+                dateInput.value = "";
+
+                updateDate();
+
+
+                /* Verlanglijst uit */
+
+                wishlistToggle.checked =
+                    false;
+
+                wishlist.classList.remove(
+                    "visible"
+                );
+
+
+                /* Blaadjes verwijderen */
+
+                document
+                    .querySelectorAll(".note")
+                    .forEach(note => {
+                        note.remove();
+                    });
+
+
+                emptyNotes.style.display =
+                    "block";
+
+
+                /* Galaxy terugzetten */
+
+                themes.forEach(item =>
+                    item.classList.remove(
+                        "selected"
+                    )
+                );
+
+
+                const defaultTheme =
+                    document.querySelector(
+                        '.theme[data-theme="default"]'
+                    );
+
+
+                defaultTheme.classList.add(
+                    "selected"
+                );
+
+
+                changeTheme(
+                    "default"
+                );
+
+
+                /* Countdown resetten */
+
+                updateCountdown();
+
+
+                /* Pop-up sluiten */
+
+                resetPopup.classList.remove(
+                    "show"
+                );
+
+
+                /* Bericht */
+
+                saveMessage.textContent =
+                    "✓ Alles is gereset!";
+
+
+                setTimeout(
+                    () => {
+
+                        saveMessage.textContent =
+                            "";
+
+                    },
+                    2500
+                );
+
+            }
+        );
+
+
+        /* ==========================================
+           POP-UP SLUITEN ALS JE BUITEN KLIKT
+        ========================================== */
+
+        resetPopup.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target === resetPopup
+                ) {
+
+                    resetPopup.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* ==========================================
+           START
+        ========================================== */
+
+        updateTitle();
+
+        updateDate();
+
+        updateCountdown();
+
+        changeTheme("default");
+
+        loadSavedData();
+
+    </script>
+
+</body>
+</html>
